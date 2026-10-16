@@ -14,6 +14,12 @@ services:
       - --port
       - "8000"
       - --reload
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:?Define POSTGRES_DB in .env}
+      DB_USER: ${POSTGRES_USER:?Define POSTGRES_USER in .env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}
     depends_on:
       db:
         condition: service_healthy
