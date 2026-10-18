@@ -74,3 +74,6 @@ crash.*.log
 # Private keys
 *.pem
 *.key
+
+#Documentation and reports
+/docs/private/
