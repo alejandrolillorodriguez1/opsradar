@@ -1,0 +1,42 @@
+services:
+  test:
+    build:
+      context: ./backend
+    working_dir: /workspace
+    volumes:
+      - ./backend:/workspace
+    environment:
+      DB_HOST: db_test
+      DB_PORT: "5432"
+      DB_NAME: opsradar_test
+      DB_USER: opsradar_test
+      DB_PASSWORD: test_only_password
+      UV_PROJECT_ENVIRONMENT: /app/.venv
+      PYTHONPATH: /workspace
+    command:
+      - /bin/sh
+      - -c
+      - >
+        uv sync --locked &&
+        uv run --no-sync alembic upgrade head &&
+        uv run --no-sync pytest
+    depends_on:
+      db_test:
+        condition: service_healthy
+
+  db_test:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: opsradar_test
+      POSTGRES_PASSWORD: test_only_password
+      POSTGRES_DB: opsradar_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
